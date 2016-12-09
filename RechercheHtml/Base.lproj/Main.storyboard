@@ -62,7 +62,6 @@
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="searchButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yKH-iL-Tfx"/>
                                     <action selector="webView:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6w1-zK-Pmm"/>
                                 </connections>
                             </button>

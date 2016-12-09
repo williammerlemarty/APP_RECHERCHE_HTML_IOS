@@ -99,20 +99,22 @@
                     NSURLSession *session = [NSURLSession sharedSession];
                     NSURLSessionDataTask * task = [session dataTaskWithURL:toLoad completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                         
-                        //Suppression et Création du fichier
-                        [fileManager removeItemAtPath:fileFinal error:nil];
-                        [fileManager createFileAtPath:fileFinal contents:nil attributes:nil];
+                       
                             
                         // JE VAIS VERIFIER SI LE CONTENU EST DE TYPE TEXT OU IMAGE
                         NSDictionary *httpResponse = [(NSHTTPURLResponse *)response allHeaderFields];
                         NSString *rep = httpResponse[@"Content-Type"];
                             
                         if([rep hasPrefix:@"text/html"]){
+                            
+                            //Suppression et Création du fichier
+                            [fileManager removeItemAtPath:fileFinal error:nil];
+                            [fileManager createFileAtPath:fileFinal contents:nil attributes:nil];
+                            
                             [_imgHtml setHidden:YES];
                             NSString *test = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                             if (test == (id)[NSNull null] || test.length == 0 ){
                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                    NSLog(@"AAAA1%s","SALUT");
                                     _writeHtml.text =  @"Cette URL n'est pas correcte";
                                     [_progressLoader stopAnimating];
                                     [_progressLoader setHidden:YES];
@@ -131,27 +133,14 @@
                             [_imgHtml setHidden:NO];
                             
                             UIImage *img = [[UIImage alloc] initWithData:data];
-                            NSString *imgData = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                                
-                            if(imgData != NULL || imgData.length == 0){
-                                [imgData writeToFile:fileFinal atomically:YES encoding:NSUTF8StringEncoding error:nil];
-                                    
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    _imgHtml.image = img;
-                                    [_progressLoader stopAnimating];
-                                    [_progressLoader setHidden:YES];
+                            
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                _imgHtml.image = img;
+                                [_progressLoader stopAnimating];
+                                [_progressLoader setHidden:YES];
                                         
-                                });
-                            }else{
-                                    
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    NSLog(@"AAAA2%s","SALUT2");
-
-                                    _writeHtml.text =  @"Cette URL n'est pas correcte";
-                                    [_progressLoader stopAnimating];
-                                    [_progressLoader setHidden:YES];
-                                });
-                            }
+                            });
+    
                         }
                     }];
                     [task resume];
@@ -162,19 +151,19 @@
                 NSURLSessionDataTask * task = [session dataTaskWithURL:toLoad completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                 
                     if(error == NULL){
-                        [fileManager createFileAtPath:fileFinal contents:nil attributes:nil];
 
                         // JE VAIS VERIFIER SI TEXT OU IMAGE
                         NSDictionary *httpResponse = [(NSHTTPURLResponse *)response allHeaderFields];
                         NSString *rep = httpResponse[@"Content-Type"];
                     
                         if([rep hasPrefix:@"text/html"]){
+                            
+                            [fileManager createFileAtPath:fileFinal contents:nil attributes:nil];
                             [_imgHtml setHidden:YES];
 
                             NSString *test = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                             if (test == (id)[NSNull null] || test.length == 0 ){
                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                    NSLog(@"AAAA3%s","SALUT3");
                                     _writeHtml.text =  @"Cette URL n'est pas correcte";
                                     [_progressLoader stopAnimating];
                                     [_progressLoader setHidden:YES];
@@ -191,29 +180,15 @@
                             }
                         }else if ([rep hasPrefix:@"image/jpeg"]){
                             [_imgHtml setHidden:NO];
-
                             UIImage *img = [[UIImage alloc] initWithData:data];
-                            NSString *imgData = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                    
-                            if(imgData != NULL || imgData.length == 0){
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    [imgData writeToFile:fileFinal atomically:YES encoding:NSUTF8StringEncoding error:nil];
-                                    _imgHtml.image = img;
-                                    [_progressLoader stopAnimating];
-                                    [_progressLoader setHidden:YES];
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                _imgHtml.image = img;
+                                [_progressLoader stopAnimating];
+                                [_progressLoader setHidden:YES];
                             
-                                });
-                            }else{
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    NSLog(@"AAAA4%s","SALUT4");
-                                    _writeHtml.text =  @"Cette URL n'est pas correcte";
-                                    [_progressLoader stopAnimating];
-                                    [_progressLoader setHidden:YES];
-                                });
-                            }
+                            });
                         }
                     }else{
-                        NSLog(@"AAAA5%s","SALUT5");
                         dispatch_async(dispatch_get_main_queue(), ^{
                             _writeHtml.text =  @"Cette URL n'est pas correcte";
                             [_progressLoader stopAnimating];
@@ -224,14 +199,12 @@
                 [task resume];
             }
         }else{
-            NSLog(@"AAAA6%s","SALUT6");
             _writeHtml.text =  @"Cette URL n'est pas correcte";
             [_progressLoader stopAnimating];
             [_progressLoader setHidden:YES];
         }
             
     }else{
-        NSLog(@"AAAA7%s","SALUT7");
         _writeHtml.text =  @"Cette URL n'est pas correcte";
         [_progressLoader stopAnimating];
         [_progressLoader setHidden:YES];
@@ -263,25 +236,35 @@
 
 - (IBAction)webView:(id)sender {
    NSString *str = self.findUrl.text;
+
     if (str == (id)[NSNull null] || str.length == 0 ){
+
         dispatch_async(dispatch_get_main_queue(), ^{
+            [_imgHtml setHidden:YES];
             _writeHtml.text =  @"Cette URL n'est pas correcte";
         });
     }else{
-        
+
         NSURL *toLoad = [NSURL URLWithString:str];
         NSURLSession *session = [NSURLSession sharedSession];
         NSURLSessionDataTask * task = [session dataTaskWithURL:toLoad completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             
+
             NSString *test = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            NSLog(@"REPONSE%@",test);
+
             if (test == (id)[NSNull null] || test.length == 0 ){
+                NSLog(@"%s","JE SUIS LA 4");
+
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    [_imgHtml setHidden:NO];
                     _writeHtml.text =  @"Cette URL n'est pas correcte";
                     
                 });
             }else{
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    
+                    NSLog(@"%s","JE SUIS LA 5");
+
                     WebViewController *vc = [self.storyboard instantiateViewControllerWithIdentifier:@"webView"];
                     vc.urlString = str;
                     [self.navigationController pushViewController:vc animated:YES];
